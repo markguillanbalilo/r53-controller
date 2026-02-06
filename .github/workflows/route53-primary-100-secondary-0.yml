@@ -1,0 +1,41 @@
+name: Route53 - Primary 100%, Secondary 0%
+
+on:
+  workflow_dispatch:
+
+jobs:
+  set-primary-100-secondary-0:
+    name: Update Route53 Weights
+    runs-on: ubuntu-latest
+
+    environment:
+      name: route53-weight-change
+      # Approval required
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Set Primary Weight to 100
+        run: |
+          aws route53 change-resource-record-sets \
+            --hosted-zone-id Z00440101WWUDAQ0PX2KS \
+            --change-batch '{
+              "Changes": [{
+                "Action": "UPSERT",
+                "ResourceRecordSet": {
+                  "Name": "server-a.com.internal",
+                  "Type": "A",
+                  "SetIdentifier": "Record Id",
+                  "Weight": 100,
+                  "TTL": 60,
+                  "ResourceRecords": [
+                    { "Value": "192.168.2.2" }
+                  ]
+                }
+              }]
+            }'
