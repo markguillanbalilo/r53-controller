@@ -32,7 +32,7 @@ jobs:
                   "Type": "A",
                   "SetIdentifier": "Record Id",
                   "Weight": 0,
-                  "TTL": 60,
+                  "TTL": 300,
                   "ResourceRecords": [
                     { "Value": "192.168.2.2" }
                   ]
