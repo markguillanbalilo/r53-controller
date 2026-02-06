@@ -1,0 +1,41 @@
+name: Route53 - Primary 50%, Secondary 50%
+
+on:
+  workflow_dispatch:
+
+jobs:
+  set-primary-secondary-50-50:
+    name: Balance Route53 Traffic
+    runs-on: ubuntu-latest
+
+    environment:
+      name: route53-weight-change
+      # Approval required
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Set Primary Weight to 50
+        run: |
+          aws route53 change-resource-record-sets \
+            --hosted-zone-id Z00440101WWUDAQ0PX2KS \
+            --change-batch '{
+              "Changes": [{
+                "Action": "UPSERT",
+                "ResourceRecordSet": {
+                  "Name": "server-a.com.internal",
+                  "Type": "A",
+                  "SetIdentifier": "Record Id",
+                  "Weight": 50,
+                  "TTL": 60,
+                  "ResourceRecords": [
+                    { "Value": "192.168.2.2" }
+                  ]
+                }
+              }]
+            }'
