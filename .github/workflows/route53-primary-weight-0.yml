@@ -30,7 +30,7 @@ jobs:
                 "ResourceRecordSet": {
                   "Name": "server-a.com.internal",
                   "Type": "A",
-                  "SetIdentifier": "Record Id",
+                  "SetIdentifier": "primary",
                   "Weight": 0,
                   "TTL": 30,
                   "ResourceRecords": [
