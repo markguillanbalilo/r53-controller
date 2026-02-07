@@ -24,7 +24,7 @@ jobs:
         run: |
           ALB_ARN="arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:listener/app/test-alb/7fca80a29e4e9f42/e04a11deb84d8779"
           aws elbv2 modify-listener \
-          --listener-arn $ALB_ARN \
+          --listener-arn $(ALB_ARN) \
           --default-actions '[{
           "Type":"forward",
           "ForwardConfig":{
