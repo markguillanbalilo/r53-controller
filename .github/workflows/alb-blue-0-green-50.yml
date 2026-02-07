@@ -3,6 +3,11 @@ name: ALB - Set EKS Blue Weight to 0%
 on:
   workflow_dispatch:
 
+env:
+  LISTENER_ARN: arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:listener/app/test-alb/7fca80a29e4e9f42/e04a11deb84d8779
+  BLUE_TG_ARN: arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:targetgroup/blue-tg/d86491da42165227
+  GREEN_TG_ARN: arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:targetgroup/green-tg/496d47e4cc035626
+
 jobs:
   set-blue-weight-zero:
     name: Set BLUE Weight to 0
@@ -10,7 +15,7 @@ jobs:
 
     environment:
       name: eks-blue-weight-change
-      # Require manual approval via Environment protection rules
+      # Manual approval via Environment protection rules
 
     steps:
       - name: Configure AWS Credentials
@@ -20,17 +25,26 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Set Route53 EKS Blue Weight to 0%
+      - name: Set ALB Traffic Weights (Blue=0 Green=100)
         run: |
-          ALB_ARN="arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:listener/app/test-alb/7fca80a29e4e9f42/e04a11deb84d8779"
+          echo "Using Listener ARN: $LISTENER_ARN"
+
           aws elbv2 modify-listener \
-          --listener-arn $(ALB_ARN) \
-          --default-actions '[{
-          "Type":"forward",
-          "ForwardConfig":{
-          "TargetGroups":[
-          {"TargetGroupArn":"arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:targetgroup/blue-tg/d86491da42165227","Weight":0},
-          {"TargetGroupArn":"arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:targetgroup/green-tg/496d47e4cc035626","Weight":50}
-          ]
-          }
-          }]'
+            --listener-arn "$LISTENER_ARN" \
+            --default-actions "[
+              {
+                \"Type\": \"forward\",
+                \"ForwardConfig\": {
+                  \"TargetGroups\": [
+                    {
+                      \"TargetGroupArn\": \"$BLUE_TG_ARN\",
+                      \"Weight\": 0
+                    },
+                    {
+                      \"TargetGroupArn\": \"$GREEN_TG_ARN\",
+                      \"Weight\": 100
+                    }
+                  ]
+                }
+              }
+            ]"
