@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
 
 env:
-  LISTENER_ARN: arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:listener/app/test-alb/7fca80a29e4e9f42/e04a11deb84d8779
-  BLUE_TG_ARN: arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:targetgroup/blue-tg/d86491da42165227
-  GREEN_TG_ARN: arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:targetgroup/green-tg/496d47e4cc035626
+  LISTENER_ARN: "arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:listener/app/test-alb/7fca80a29e4e9f42/e04a11deb84d8779"
+  BLUE_TG_ARN: "arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:targetgroup/blue-tg/d86491da42165227"
+  GREEN_TG_ARN: "arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:targetgroup/green-tg/496d47e4cc035626"
 
 jobs:
   set-blue-weight-zero:
