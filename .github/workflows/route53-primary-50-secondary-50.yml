@@ -30,11 +30,32 @@ jobs:
                 "ResourceRecordSet": {
                   "Name": "server-a.com.internal",
                   "Type": "A",
-                  "SetIdentifier": "Record Id",
+                  "SetIdentifier": "primary",
                   "Weight": 50,
-                  "TTL": 60,
+                  "TTL": 30,
                   "ResourceRecords": [
                     { "Value": "192.168.2.2" }
+                  ]
+                }
+              }]
+            }'
+
+
+      - name: Set Secondary Weight to 50
+        run: |
+          aws route53 change-resource-record-sets \
+            --hosted-zone-id Z00440101WWUDAQ0PX2KS \
+            --change-batch '{
+              "Changes": [{
+                "Action": "UPSERT",
+                "ResourceRecordSet": {
+                  "Name": "server-a.com.internal",
+                  "Type": "A",
+                  "SetIdentifier": "secondary",
+                  "Weight": 50,
+                  "TTL": 30,
+                  "ResourceRecords": [
+                    { "Value": "192.168.2.3" }
                   ]
                 }
               }]
