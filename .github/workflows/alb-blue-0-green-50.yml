@@ -10,12 +10,9 @@ env:
 
 jobs:
   set-blue-weight-zero:
-    name: Set BLUE Weight to 0
     runs-on: ubuntu-latest
-
     environment:
       name: eks-blue-weight-change
-      # Manual approval via Environment protection rules
 
     steps:
       - name: Configure AWS Credentials
@@ -25,26 +22,34 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Set ALB Traffic Weights (Blue=0 Green=100)
+      - name: Create Forward Config JSON
         run: |
-          echo "Using Listener ARN: $LISTENER_ARN"
+          cat <<EOF > forward.json
+          [
+            {
+              "Type": "forward",
+              "ForwardConfig": {
+                "TargetGroups": [
+                  {
+                    "TargetGroupArn": "${BLUE_TG_ARN}",
+                    "Weight": 0
+                  },
+                  {
+                    "TargetGroupArn": "${GREEN_TG_ARN}",
+                    "Weight": 100
+                  }
+                ]
+              }
+            }
+          ]
+          EOF
+
+          cat forward.json
+
+      - name: Modify Listener Weights
+        run: |
+          echo "Listener ARN: $LISTENER_ARN"
 
           aws elbv2 modify-listener \
             --listener-arn "$LISTENER_ARN" \
-            --default-actions "[
-              {
-                \"Type\": \"forward\",
-                \"ForwardConfig\": {
-                  \"TargetGroups\": [
-                    {
-                      \"TargetGroupArn\": \"$BLUE_TG_ARN\",
-                      \"Weight\": 0
-                    },
-                    {
-                      \"TargetGroupArn\": \"$GREEN_TG_ARN\",
-                      \"Weight\": 100
-                    }
-                  ]
-                }
-              }
-            ]"
+            --default-actions file://forward.json
