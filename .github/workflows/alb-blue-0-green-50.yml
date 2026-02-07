@@ -1,4 +1,4 @@
-name: Route53 - Set EKS Blue Weight to 0%
+name: ALB - Set EKS Blue Weight to 0%
 
 on:
   workflow_dispatch:
