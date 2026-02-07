@@ -1,0 +1,36 @@
+name: Route53 - Set EKS Blue Weight to 0%
+
+on:
+  workflow_dispatch:
+
+jobs:
+  set-blue-weight-zero:
+    name: Set BLUE Weight to 0
+    runs-on: ubuntu-latest
+
+    environment:
+      name: eks-blue-weight-change
+      # Require manual approval via Environment protection rules
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Set Route53 EKS Blue Weight to 0%
+        run: |
+          ALB_ARN="arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:listener/app/test-alb/7fca80a29e4e9f42/e04a11deb84d8779"
+          aws elbv2 modify-listener \
+          --listener-arn listener-arn \
+          --default-actions '[{
+          "Type":"forward",
+          "ForwardConfig":{
+          "TargetGroups":[
+          {"TargetGroupArn":"arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:targetgroup/blue-tg/d86491da42165227","Weight":0},
+          {"TargetGroupArn":"arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:targetgroup/green-tg/496d47e4cc035626","Weight":50}
+          ]
+          }
+        }]'
