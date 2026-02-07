@@ -33,4 +33,4 @@ jobs:
           {"TargetGroupArn":"arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:targetgroup/green-tg/496d47e4cc035626","Weight":50}
           ]
           }
-        }]'
+          }]'
