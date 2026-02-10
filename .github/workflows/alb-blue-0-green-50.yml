@@ -1,18 +1,18 @@
-name: ALB - Set EKS Blue Weight to 0%
+name: ALB - Set Listener Rule Blue Weight to 0%
 
 on:
   workflow_dispatch:
 
 env:
-  LISTENER_ARN: "arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:listener/app/test-alb/7fca80a29e4e9f42/e04a11deb84d8779"
+  RULE_ARN: "arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:listener-rule/app/test-alb/7fca80a29e4e9f42/e04a11deb84d8779/f4dfc6fa5477d063"
   BLUE_TG_ARN: "arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:targetgroup/blue-tg/d86491da42165227"
   GREEN_TG_ARN: "arn:aws:elasticloadbalancing:ap-southeast-1:697520799379:targetgroup/green-tg/496d47e4cc035626"
 
 jobs:
-  set-blue-weight-zero:
+  set-rule-blue-weight-zero:
     runs-on: ubuntu-latest
     environment:
-      name: eks-blue-weight-change
+      name: eks-rule-blue-weight-change
 
     steps:
       - name: Configure AWS Credentials
@@ -51,14 +51,14 @@ jobs:
           cat forward_final.json
           echo "==========================="
 
-      - name: Modify Listener Weights
+      - name: Modify Listener Rule Weights
         run: |
-          echo "=== Listener ARN ==="
-          echo "$LISTENER_ARN"
-          echo "===================="
+          echo "=== Rule ARN ==="
+          echo "$RULE_ARN"
+          echo "==============="
           
           echo "=== Verifying ARN format ==="
-          echo "$LISTENER_ARN" | grep -E '^arn:aws:elasticloadbalancing:[a-z]{2}-[a-z]+-[0-9]+:[0-9]+:listener/app/[a-zA-Z0-9-]+/[a-f0-9]{16,36}$' && echo "ARN format is valid" || echo "ARN format is invalid"
+          echo "$RULE_ARN" | grep -E '^arn:aws:elasticloadbalancing:[a-z]{2}-[a-z]+-[0-9]+:[0-9]+:listener-rule/app/[a-zA-Z0-9-]+/[a-f0-9]{16,36}/[a-f0-9]{16,36}$' && echo "ARN format is valid" || echo "ARN format is invalid"
           echo "============================"
           
           echo "=== Forward JSON Content ==="
@@ -66,9 +66,10 @@ jobs:
           echo "==========================="
           
           echo "=== Executing AWS CLI command ==="
-          aws elbv2 modify-listener \
-            --region ap-southeast-1 \
-            --listener-arn "$LISTENER_ARN" \
-            --default-actions file://forward_final.json
+          aws elbv2 modify-rule \
+            --rule-arn "$RULE_ARN" \
+            --actions file://forward_final.json
+          
+          echo "=== Listener rule modified successfully ==="
         env:
-          LISTENER_ARN: ${{ env.LISTENER_ARN }}
+          RULE_ARN: ${{ env.RULE_ARN }}
