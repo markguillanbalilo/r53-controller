@@ -24,18 +24,18 @@ jobs:
 
       - name: Create Forward Config JSON
         run: |
-          cat <<EOF > forward.json
+          cat > forward.json <<'EOF'
           [
             {
               "Type": "forward",
               "ForwardConfig": {
                 "TargetGroups": [
                   {
-                    "TargetGroupArn": "${BLUE_TG_ARN}",
+                    "TargetGroupArn": "$BLUE_TG_ARN",
                     "Weight": 0
                   },
                   {
-                    "TargetGroupArn": "${GREEN_TG_ARN}",
+                    "TargetGroupArn": "$GREEN_TG_ARN",
                     "Weight": 100
                   }
                 ]
@@ -43,13 +43,25 @@ jobs:
             }
           ]
           EOF
-
-          cat forward.json
+          
+          # Substitute environment variables
+          envsubst < forward.json > forward_final.json
+          
+          echo "=== Forward Config JSON ==="
+          cat forward_final.json
+          echo "==========================="
 
       - name: Modify Listener Weights
         run: |
-          echo "Listener ARN: $LISTENER_ARN"
-
+          echo "=== Listener ARN ==="
+          echo "$LISTENER_ARN"
+          echo "===================="
+          
+          echo "=== Verifying ARN format ==="
+          echo "$LISTENER_ARN" | grep -E '^arn:aws:elasticloadbalancing:[a-z]{2}-[a-z]+-[0-9]+:[0-9]+:listener/app/[a-zA-Z0-9-]+/[a-f0-9]{16,36}$' && echo "ARN format is valid" || echo "ARN format is invalid"
+          echo "============================"
+          
+          echo "=== Executing AWS CLI command ==="
           aws elbv2 modify-listener \
             --listener-arn "$LISTENER_ARN" \
-            --default-actions file://forward.json
+            --default-actions file://forward_final.json
