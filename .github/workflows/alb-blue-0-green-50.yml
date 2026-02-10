@@ -61,7 +61,13 @@ jobs:
           echo "$LISTENER_ARN" | grep -E '^arn:aws:elasticloadbalancing:[a-z]{2}-[a-z]+-[0-9]+:[0-9]+:listener/app/[a-zA-Z0-9-]+/[a-f0-9]{16,36}$' && echo "ARN format is valid" || echo "ARN format is invalid"
           echo "============================"
           
+          echo "=== Forward JSON Content ==="
+          cat forward_final.json
+          echo "==========================="
+          
           echo "=== Executing AWS CLI command ==="
           aws elbv2 modify-listener \
             --listener-arn "$LISTENER_ARN" \
             --default-actions file://forward_final.json
+        env:
+          LISTENER_ARN: ${{ env.LISTENER_ARN }}
