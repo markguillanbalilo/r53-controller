@@ -67,6 +67,7 @@ jobs:
           
           echo "=== Executing AWS CLI command ==="
           aws elbv2 modify-listener \
+            --region ap-southeast-1 \
             --listener-arn "$LISTENER_ARN" \
             --default-actions file://forward_final.json
         env:
